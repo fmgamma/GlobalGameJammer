@@ -10,7 +10,8 @@ public class Platform_Manager_Script : MonoBehaviour
     public List<GameObject> rightsideSpawns;
     public float spawnRate;
     private float spawnTime;
-    public float platformSpeed;
+    private float platformSpeed;
+    public float platformSpeedMax;
 
     [SerializeField] private List<GameObject> spawnedPlatformsRight = new List<GameObject>();
     [SerializeField] private List<GameObject> spawnedPlatformsLeft = new List<GameObject>();
@@ -18,10 +19,14 @@ public class Platform_Manager_Script : MonoBehaviour
     [SerializeField] private Camera cam;
 
     [SerializeField] private float switchTimer = 0.0f;
+    [SerializeField] private float maxTimer = 20.0f;
+    [SerializeField] private float timer = 0.0f;
     [SerializeField] private float switchTimerTheshold = 30.0f;
 
     [SerializeField] private bool isFlipped = false;
+    [SerializeField] private AnimationCurve test;
 
+    private bool isStarting = true;
 
     // Start is called before the first frame update
     void Start()
@@ -29,27 +34,40 @@ public class Platform_Manager_Script : MonoBehaviour
         spawnTime = 0.0f;
         if (cam == null)
             cam = FindObjectOfType<Camera>();
-        SetPlatformPos(isFlipped);
+        FlipPlatforms();
+        SoundManager.Instance.PlaySound(SoundManager.SoundNames.inGameMusicStart);
     }
 
     // Update is called once per frame
     void Update()
     {
-        spawnTime += Time.deltaTime;
+        if (GameManager.Instance.sGameState != GameManager.GameState.PLAYING)
+            return;
+
+
+        if (isStarting)
+        {
+            timer += Time.deltaTime;
+            platformSpeed = test.Evaluate(timer);
+            if (platformSpeed >= platformSpeedMax)
+                isStarting = false;
+        }
+
+        if(platformSpeed > 0.1f)
+            spawnTime += Time.deltaTime * (platformSpeed / platformSpeedMax);
+
         if (spawnTime >= spawnRate)
         {
             spawnTime = 0.0f;
 
             spawnedPlatformsLeft.Add(Instantiate(platform, leftsideSpawns[Random.Range(0, 5)].transform.position,
                 Quaternion.identity));
-            spawnedPlatformsLeft.Last().GetComponent<Rigidbody2D>().velocity = new Vector2(0, -platformSpeed);
+            spawnedPlatformsLeft.Last().GetComponent<Rigidbody2D>().velocity = new Vector2(0, platformSpeed);
 
 
             spawnedPlatformsRight.Add(Instantiate(platform, rightsideSpawns[Random.Range(0, 5)].transform.position,
                 Quaternion.identity));
-            spawnedPlatformsRight.Last().GetComponent<Rigidbody2D>().velocity = new Vector2(0, platformSpeed);
-           
-
+            spawnedPlatformsRight.Last().GetComponent<Rigidbody2D>().velocity = new Vector2(0, -platformSpeed);
         }
 
         spawnedPlatformsRight.RemoveAll(item => item == null);
@@ -60,12 +78,30 @@ public class Platform_Manager_Script : MonoBehaviour
         debuff = spawnedPlatformsRight.First().GetComponent<PlatformDebuffs>().currentDebuff;
         spawnedPlatformsRight.Last().GetComponent<PlatformDebuffs>().currentDebuff = debuff;
 
+        if (timer < maxTimer)
+        {
+            foreach (var GAME_OBJECT in spawnedPlatformsLeft)
+            {
+                GAME_OBJECT.GetComponent<Rigidbody2D>().velocity = new Vector2(0, platformSpeed);
+            }
+            foreach (var GAME_OBJECT in spawnedPlatformsRight)
+            {
+                GAME_OBJECT.GetComponent<Rigidbody2D>().velocity = new Vector2(0, -platformSpeed);
+            }
+        }
+
         switchTimer += Time.deltaTime;
         if (switchTimer > switchTimerTheshold)
         {
             FlipPlatforms();
         }
 
+
+        if (!SoundManager.Instance.IsPlaying(SoundManager.SoundNames.inGameMusicStart))
+        {
+            if (!SoundManager.Instance.IsPlaying(SoundManager.SoundNames.inGameMusicMain) && timer + 10.0f > maxTimer)
+                SoundManager.Instance.PlaySound(SoundManager.SoundNames.inGameMusicMain);
+        }
     }
 
     public void SetDebuffAll(DebuffManager.Debuffs debuff)
@@ -152,18 +188,20 @@ public class Platform_Manager_Script : MonoBehaviour
 
     private void SetPlatformPos(bool flip)
     {
+        const float OFFSET = 0.1f;
         if (flip)
         {
+
             foreach (var rSpawn in rightsideSpawns)
             {
                 Vector3 pos = rSpawn.gameObject.GetComponent<Transform>().position;
-                pos.Set(pos.x, (cam.orthographicSize + 0.5f), 0.0f);
+                pos.Set(pos.x, (cam.orthographicSize + OFFSET), 0.0f);
                 rSpawn.gameObject.GetComponent<Transform>().position = pos;
             }
             foreach (var lSpawn in leftsideSpawns)
             {
                 Vector3 pos = lSpawn.gameObject.GetComponent<Transform>().position;
-                pos.Set(pos.x, -(cam.orthographicSize + 0.5f), 0.0f);
+                pos.Set(pos.x, -(cam.orthographicSize + OFFSET), 0.0f);
                 lSpawn.gameObject.GetComponent<Transform>().position = pos;
             }
         }
@@ -172,13 +210,13 @@ public class Platform_Manager_Script : MonoBehaviour
             foreach (var rSpawn in rightsideSpawns)
             {
                 Vector3 pos = rSpawn.gameObject.GetComponent<Transform>().position;
-                pos.Set(pos.x, -(cam.orthographicSize + 0.5f), 0.0f);
+                pos.Set(pos.x, -(cam.orthographicSize + OFFSET), 0.0f);
                 rSpawn.gameObject.GetComponent<Transform>().position = pos;
             }
             foreach (var lSpawn in leftsideSpawns)
             {
                 Vector3 pos = lSpawn.gameObject.GetComponent<Transform>().position;
-                pos.Set(pos.x, (cam.orthographicSize + 0.5f), 0.0f);
+                pos.Set(pos.x, (cam.orthographicSize + OFFSET), 0.0f);
                 lSpawn.gameObject.GetComponent<Transform>().position = pos;
             }
         }

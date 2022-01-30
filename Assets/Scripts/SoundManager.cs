@@ -38,7 +38,8 @@ public class SoundManager : MonoBehaviour
         spikeIncrease,
         projctileFalling,
         mainMenuMusic,
-        inGameMusic,
+        inGameMusicStart,
+        inGameMusicMain,
         pauseMenuMusic,
         postGameSummary,
         brittlePlatformBroken,
@@ -60,7 +61,15 @@ public class SoundManager : MonoBehaviour
         {
             instance = this;
         }
+
+        DontDestroyOnLoad(this.gameObject);
     }
+
+    void Start()
+    {
+
+    }
+
     private void Update()
     {
         
@@ -75,8 +84,17 @@ public class SoundManager : MonoBehaviour
     [SerializeField]
     private List<KeySF> soundEffects;
 
-    private void Start()
+    public bool IsPlaying(SoundNames sn)
     {
+        foreach (KeySF sf in soundEffects)
+        {
+            if (sf.sn == sn)
+            {
+                return sf.ass.isPlaying;
+            }
+        }
+
+        return false;
     }
 
     public void PlaySound(SoundNames sn)
@@ -101,6 +119,38 @@ public class SoundManager : MonoBehaviour
             }
         }
     }
+    public void PauseSound(SoundNames sn)
+    {
+        foreach (KeySF sf in soundEffects)
+        {
+            if (sf.sn == sn)
+            {
+                sf.ass.Pause();
+            }
+        }
+    }
+    public void UnPauseSound(SoundNames sn)
+    {
+        foreach (KeySF sf in soundEffects)
+        {
+            if (sf.sn == sn)
+            {
+                sf.ass.UnPause();
+            }
+        }
+    }
 
+
+    public AudioSource GetAss(SoundNames sn)
+    {
+        foreach (KeySF sf in soundEffects)
+        {
+            if (sf.sn == sn)
+            {
+                return (sf.ass);
+            }
+        }
+        return (soundEffects[0].ass);
+    }
 
 }

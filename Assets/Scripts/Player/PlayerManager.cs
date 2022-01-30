@@ -16,6 +16,8 @@ public class PlayerManager : MonoBehaviour
     public float movementSpeedMod = 1.0f;
     public float invert = 1.0f;
 
+    public float lifeTimer;
+
     public bool p2;
 
     private bool grounded;
@@ -79,6 +81,12 @@ public class PlayerManager : MonoBehaviour
     {
         if (!playerDead)
         {
+            lifeTimer -= Time.deltaTime;
+
+            if(lifeTimer < 0.0f)
+            {
+                PlayerDeath();
+            }
             Move();
             Jump();
             SpikeExcitement();
@@ -119,6 +127,8 @@ public class PlayerManager : MonoBehaviour
         {
             if(animator.lastFrameFlag)
             {
+                GameManager gm = GameManager.Instance;
+                gm.EndGame(p2);
                 animator.SetPaused(true);
             }
         }
@@ -343,6 +353,7 @@ public class PlayerManager : MonoBehaviour
     }
     public void PlayerDeath()
     {
+        
         prevAnimState = AnimationStates.DYING;
         playerDead = true; //haha fuck your anim state buddy
         animator.ChangeAnimation((int)prevAnimState);

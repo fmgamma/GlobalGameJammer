@@ -7,7 +7,7 @@ public class Platform_script : MonoBehaviour
     private Camera cam;
 
     private Transform tm;
-    private float destroyDelay = 1.0f;
+    [SerializeField] private float destroyDelay = 1.0f;
     private float timer = 0.0f;
 
     // Start is called before the first frame update

@@ -61,6 +61,13 @@ public class GameManager : MonoBehaviour
 
     public void PlayGame()
     {
+        LevelScript ls = GameObject.FindGameObjectWithTag("LevelScript").GetComponent<LevelScript>();
+        SoundManager sm = SoundManager.Instance;
+
+        sm.UnPauseSound(ls.LevelMusic);
+        sm.StopSound(SoundManager.SoundNames.pauseMenuMusic);
+        ls.SetBackgroundVolume(1);
+
         sGameState = GameState.PLAYING;
         Time.timeScale = 1.0f;
         pauseUI.SetActive(false);
@@ -70,6 +77,14 @@ public class GameManager : MonoBehaviour
 
     public void PauseGame()
     {
+        LevelScript ls = GameObject.FindGameObjectWithTag("LevelScript").GetComponent<LevelScript>();
+        SoundManager sm = SoundManager.Instance;
+        sm.PlaySound(SoundManager.SoundNames.gamePaused);
+        sm.PauseSound(ls.LevelMusic);
+        //ls.StopBackgroundNoise(); //If you do notwant background on pause
+        ls.SetBackgroundVolume(0.1f);
+        sm.PlaySound(SoundManager.SoundNames.pauseMenuMusic);
+
         sGameState = GameState.PAUSED;
         Time.timeScale = 0.0f;
         pauseUI.SetActive(true);
@@ -79,6 +94,10 @@ public class GameManager : MonoBehaviour
 
     public void EndGame(bool leftSideWon)
     {
+        if(sGameState == GameState.GAMEOVER)
+        {
+            return;
+        }
         sGameState = GameState.GAMEOVER;
         Time.timeScale = 0.0f;
         Cursor.lockState = CursorLockMode.Confined;

@@ -35,10 +35,7 @@ public class Spikes : MonoBehaviour
     }
 
     private void FlagEndGame()
-    {
-        GameManager gm = GameManager.Instance;
-        gm.EndGame((player.p2));
-        Debug.Log("game ended");
+    { 
         killing = false;
     }
 }

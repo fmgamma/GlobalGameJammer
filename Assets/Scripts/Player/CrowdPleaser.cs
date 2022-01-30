@@ -21,6 +21,7 @@ public class CrowdPleaser : MonoBehaviour
     public float crowdMoodModModMod = 1.0f;
     [SerializeField] private float crowdMoodThreshold = 1.0f;
     [SerializeField] private float crowdMoodCooldown = 10.0f;
+    [SerializeField] private float crowdMoodDecreaseRate = 1.0f;
 
     [SerializeField] private bool isWaiting = false;
     private DebuffManager debuffManager;
@@ -49,6 +50,14 @@ public class CrowdPleaser : MonoBehaviour
         switch (GameManager.Instance.sGameState)
         {
             case GameManager.GameState.PLAYING:
+                if(crowdMood > 0.0f)
+                {
+                    crowdMood -= crowdMoodDecreaseRate * Time.deltaTime;
+                    if(crowdMood < 0.0f)
+                    {
+                        crowdMood = 0.0f;
+                    }
+                }
                 IncreaseMood();
                 break;        
         }
