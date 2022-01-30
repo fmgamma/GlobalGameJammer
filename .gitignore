@@ -338,3 +338,18 @@ ASALocalRun/
 
 # BeatPulse healthcheck temp database
 healthchecksdb
+/Assets/Fonts
+/Assets/Images
+/Assets/Prefabs
+/Assets/Scenes
+/Assets/Sounds
+/Assets/Sprites
+/Library/APIUpdater
+/Library
+/Logs
+/ProjectSettings
+/Temp
+/UserSettings
+/GlobalGameJammer.sln
+/Assembly-CSharp.csproj
+/.vsconfig
